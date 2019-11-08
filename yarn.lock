@@ -8154,10 +8154,10 @@ react-scripts@3.2.0:
   optionalDependencies:
     fsevents "2.0.7"
 
-react-three-fiber@^3.0.12:
-  version "3.0.12"
-  resolved "https://registry.yarnpkg.com/react-three-fiber/-/react-three-fiber-3.0.12.tgz#6d7cf09dcaf5018a2084a26a5244e56a352adc22"
-  integrity sha512-ehSRB2pLtEzK/z1f4ijR/nmi947aGa0ZX0NAChHizi/IXWvhwWJV7DqugVR+98mmM4yZRPxxTMcuR+AJ4Mgxww==
+react-three-fiber@^3.0.13:
+  version "3.0.13"
+  resolved "https://registry.yarnpkg.com/react-three-fiber/-/react-three-fiber-3.0.13.tgz#1c06838851c1b2b2397051281d6e99a77a856c7a"
+  integrity sha512-osRXChTJozzx9pp/XsjVal0ImCO5a/cFERXb1T/LCTZAywgZmror1BDVjKOA3EsuA3ZNxWCUZrxYhSMRaB9vaw==
   dependencies:
     "@babel/runtime" "^7.7.1"
     react-promise-suspense "^0.3.1"
