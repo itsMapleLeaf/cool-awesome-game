@@ -26,7 +26,7 @@ function DemoBox() {
 
 export default function App() {
   return (
-    <Canvas>
+    <Canvas gl2>
       <DemoBox />
     </Canvas>
   )
