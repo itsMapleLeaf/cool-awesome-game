@@ -1,8 +1,9 @@
 import React, { useRef } from "react"
 import { Canvas, useFrame } from "react-three-fiber"
+import { Mesh } from "three"
 
 function DemoBox() {
-  const ref = useRef<any>()
+  const ref = useRef<Mesh>()
 
   useFrame(() => {
     ref.current!.rotation.x = ref.current!.rotation.y += 0.01
