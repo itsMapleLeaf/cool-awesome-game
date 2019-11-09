@@ -2,6 +2,8 @@ import React, { useRef } from "react"
 import { Canvas, useFrame } from "react-three-fiber"
 import { Mesh } from "three"
 
+import "./styles/app.module.css"
+
 function DemoBox() {
   const ref = useRef<Mesh>()
 
@@ -24,7 +26,7 @@ function DemoBox() {
 
 export default function App() {
   return (
-    <Canvas gl2>
+    <Canvas>
       <DemoBox />
     </Canvas>
   )
