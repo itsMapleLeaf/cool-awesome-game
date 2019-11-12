@@ -1,0 +1,16 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ts-node-dev --no-notify --transpile-only src/index.ts",
+    "start": "ts-node --transpile-only src/index.ts"
+  },
+  "dependencies": {
+    "ts-node": "^8.5.0"
+  },
+  "devDependencies": {
+    "ts-node-dev": "^1.0.0-pre.44",
+    "typescript": "^3.7.2"
+  }
+}
