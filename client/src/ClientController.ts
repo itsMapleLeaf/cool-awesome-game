@@ -1,7 +1,6 @@
+import { ClientMessage } from "@game/core"
 import { createSocket } from "./createSocket"
 import { sleep } from "./sleep"
-
-type ClientMessage = { type: "move"; direction: -1 | 1 }
 
 export class ClientContoller {
   private socket?: WebSocket

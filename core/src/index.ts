@@ -1,1 +1,1 @@
-export * from "./game/store"
+export type ClientMessage = { type: "move"; direction: -1 | 1 }
