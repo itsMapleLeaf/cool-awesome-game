@@ -1,6 +1,8 @@
-import React, { useRef } from "react"
+import React, { useEffect, useRef } from "react"
 import { Canvas, useFrame } from "react-three-fiber"
 import { Mesh } from "three"
+import { ClientContoller } from "./ClientController"
+import { useWindowEvent } from "./useWindowEvent"
 
 function DemoBox() {
   const ref = useRef<Mesh>()
@@ -10,19 +12,32 @@ function DemoBox() {
   })
 
   return (
-    <mesh
-      ref={ref}
-      onClick={() => console.log("click")}
-      onPointerOver={() => console.log("hover")}
-      onPointerOut={() => console.log("unhover")}
-    >
+    <mesh ref={ref}>
       <boxBufferGeometry attach="geometry" args={[1, 1, 1]} />
       <meshNormalMaterial attach="material" />
     </mesh>
   )
 }
 
+const controller = new ClientContoller()
+
 export default function App() {
+  useEffect(() => {
+    controller.connect()
+    return () => controller.disconnect()
+  }, [])
+
+  useWindowEvent("keydown", (event) => {
+    const bindings: { [_ in string]?: () => void } = {
+      ArrowLeft: () => controller.move(-1),
+      ArrowRight: () => controller.move(1),
+    }
+
+    // TODO: use optional chaining lol
+    const fn = bindings[event.key]
+    if (fn) fn()
+  })
+
   return (
     <Canvas gl2>
       <DemoBox />
