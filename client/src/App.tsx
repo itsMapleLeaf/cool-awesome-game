@@ -19,9 +19,11 @@ function DemoBox() {
   )
 }
 
-const controller = new ClientContoller()
+type Props = {
+  controller: ClientContoller
+}
 
-export default function App() {
+export default function App({ controller }: Props) {
   useEffect(() => {
     controller.connect()
     return () => controller.disconnect()

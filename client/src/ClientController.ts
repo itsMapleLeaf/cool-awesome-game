@@ -33,6 +33,15 @@ export class ClientContoller {
     this.sendMessage({ type: "move", direction })
   }
 
+  async joinNewGame() {
+    // TODO
+    return ""
+  }
+
+  async joinGame(id: string) {
+    // TODO
+  }
+
   private sendMessage(message: ClientMessage) {
     // TODO: use optional chaining
     if (this.socket) this.socket.send(JSON.stringify(message))

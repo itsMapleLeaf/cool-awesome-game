@@ -15,5 +15,6 @@
   },
   "dependencies": {
     "wsrun": "^5.0.2"
-  }
+  },
+  "devDependencies": {}
 }
