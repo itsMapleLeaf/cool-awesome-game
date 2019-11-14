@@ -1,4 +1,4 @@
-import { ClientMessage } from "../core"
+import { ClientMessage } from "../core/types"
 import { createSocket } from "./createSocket"
 import { sleep } from "./sleep"
 
