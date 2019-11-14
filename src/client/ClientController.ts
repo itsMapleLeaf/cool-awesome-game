@@ -1,4 +1,4 @@
-import { ClientMessage } from "@game/core"
+import { ClientMessage } from "../core"
 import { createSocket } from "./createSocket"
 import { sleep } from "./sleep"
 

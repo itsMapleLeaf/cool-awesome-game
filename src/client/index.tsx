@@ -10,6 +10,7 @@ async function main() {
   // or even full on react router?
   const gamePathRegex = /^\/?game\/([a-z0-9-]+)$/i
   let pathMatch: RegExpMatchArray | null
+
   if (window.location.pathname === "/") {
     const gameId = await controller.joinNewGame()
     window.history.replaceState(undefined, document.title, `/game/${gameId}`)

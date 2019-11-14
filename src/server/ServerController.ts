@@ -1,6 +1,6 @@
-import { ClientMessage } from "@game/core"
 import uuid from "uuid/v4"
 import WebSocket from "ws"
+import { ClientMessage } from "../core"
 
 export class GameServer {
   private server = new WebSocket.Server({ port: 3001 })

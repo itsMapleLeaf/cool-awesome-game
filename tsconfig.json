@@ -15,5 +15,5 @@
     "jsx": "react",
     "lib": ["dom", "dom.iterable", "esnext"]
   },
-  "include": ["core", "client", "server"]
+  "include": ["src"]
 }
