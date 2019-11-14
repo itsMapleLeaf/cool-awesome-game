@@ -2,6 +2,7 @@ import React from "react"
 import ReactDOM from "react-dom"
 import App from "./App"
 import { ClientContoller } from "./ClientController"
+import "./styles.css"
 
 async function main() {
   const controller = new ClientContoller()

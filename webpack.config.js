@@ -31,6 +31,9 @@ const clientConfig = merge(baseConfig, {
     path: join(__dirname, "build/client"),
     filename: "client.js",
   },
+  module: {
+    rules: [{ test: /\.css$/, use: ["style-loader", "css-loader"] }],
+  },
   plugins: [new HtmlWebpackPlugin({ template: "src/client/index.html" })],
   devServer: {
     contentBase: join(__dirname, "build/client"),
