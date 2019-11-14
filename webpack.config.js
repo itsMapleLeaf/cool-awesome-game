@@ -21,7 +21,7 @@ const baseConfig = {
     maxAssetSize: Infinity,
     maxEntrypointSize: Infinity,
   },
-  stats: "minimal",
+  stats: "normal",
   mode: process.env.NODE_ENV === "production" ? "production" : "development",
 }
 
@@ -30,13 +30,14 @@ const clientConfig = merge(baseConfig, {
   output: {
     path: join(__dirname, "build/client"),
     filename: "client.js",
+    publicPath: "/",
   },
   module: {
     rules: [{ test: /\.css$/, use: ["style-loader", "css-loader"] }],
   },
   plugins: [new HtmlWebpackPlugin({ template: "src/client/index.html" })],
   devServer: {
-    contentBase: join(__dirname, "build/client"),
+    historyApiFallback: true,
   },
 })
 
@@ -45,7 +46,6 @@ const serverConfig = merge(baseConfig, {
   output: {
     path: join(__dirname, "build"),
     filename: "server.js",
-    publicPath: "/",
     libraryTarget: "commonjs",
   },
   target: "node",
