@@ -1,6 +1,12 @@
-export type ClientMessage =
+export type SocketMessageBase = { id: string }
+
+export type ClientMessageBase =
   | { type: "new-room" }
-  | { type: "join-room"; id: string }
+  | { type: "join-room"; roomId: string }
   | { type: "move"; direction: -1 | 1 }
 
-export type ServerMessage = { type: "new-room"; id: string }
+export type ServerMessageBase = { type: "new-room"; id: string }
+
+export type ClientMessage = SocketMessageBase & ClientMessageBase
+
+export type ServerMessage = SocketMessageBase & ServerMessageBase

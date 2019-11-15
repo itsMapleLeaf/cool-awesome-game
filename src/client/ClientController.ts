@@ -1,9 +1,11 @@
-import { ClientMessage } from "../core/types"
+import uuid from "uuid/v4"
+import { ClientMessageBase } from "../core/types"
 import { createSocket } from "./createSocket"
 import { sleep } from "./sleep"
+import { ClientSocket } from "./types"
 
 export class ClientContoller {
-  private socket?: WebSocket
+  private socket?: ClientSocket
 
   async connect() {
     while (!this.socket) {
@@ -11,7 +13,7 @@ export class ClientContoller {
         const socket = (this.socket = await createSocket("ws://localhost:3001"))
 
         // try to reconnect if we close
-        socket.addEventListener("close", () => {
+        socket.onClose(() => {
           // this _might_ cause a memory leak
           // i'm not sure if we can rely on listeners being removed when the socket gets GC'd,
           // but we'll cross that bridge when we get to it
@@ -26,7 +28,7 @@ export class ClientContoller {
   }
 
   disconnect() {
-    if (this.socket) this.socket.close()
+    this.socket?.close()
   }
 
   move(direction: -1 | 1) {
@@ -42,8 +44,7 @@ export class ClientContoller {
     // TODO
   }
 
-  private sendMessage(message: ClientMessage) {
-    // TODO: use optional chaining
-    if (this.socket) this.socket.send(JSON.stringify(message))
+  private sendMessage(props: ClientMessageBase) {
+    this.socket?.send({ id: uuid(), ...props })
   }
 }

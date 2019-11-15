@@ -1,3 +1,3 @@
-import { GameServer } from "./ServerController"
+import { GameServer } from "./GameServer"
 
 new GameServer()

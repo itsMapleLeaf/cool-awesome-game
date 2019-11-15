@@ -1,6 +1,9 @@
-import uuid from "uuid/v4"
 import WebSocket from "ws"
+import { TypedWebSocket } from "../core/TypedWebSocket"
 import { ClientMessage } from "../core/types"
+import { Client } from "./Client"
+import { Game } from "./Game"
+import { ServerSocket } from "./types"
 
 export class GameServer {
   private server = new WebSocket.Server({ port: 3001 })
@@ -8,16 +11,18 @@ export class GameServer {
   private games = new Map<string, Game>()
 
   constructor() {
-    this.server.on("connection", (socket) => {
+    this.server.on("connection", (baseSocket) => {
+      const socket: ServerSocket = new TypedWebSocket(baseSocket)
+
       const client = new Client(socket)
       this.clients.set(client.id, client)
       console.info(`new client: ${client.id}`)
 
-      socket.on("message", (data) => {
-        this.handleClientMessage(JSON.parse(String(data)), client)
+      socket.onMessage((data) => {
+        this.handleClientMessage(data, client)
       })
 
-      socket.on("close", () => {
+      socket.onClose(() => {
         console.info(`disconnected: ${client.id}`)
       })
     })
@@ -36,14 +41,4 @@ export class GameServer {
       }
     }
   }
-}
-
-class Client {
-  readonly id = uuid()
-  constructor(private readonly socket: WebSocket) {}
-}
-
-class Game {
-  readonly id = uuid()
-  readonly players: string[] = []
 }
