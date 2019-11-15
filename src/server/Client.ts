@@ -3,5 +3,5 @@ import { ServerSocket } from "./types"
 
 export class Client {
   readonly id = uuid()
-  constructor(private readonly socket: ServerSocket) {}
+  constructor(public readonly socket: ServerSocket) {}
 }

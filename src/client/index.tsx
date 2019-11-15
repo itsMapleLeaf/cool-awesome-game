@@ -6,6 +6,7 @@ import "./styles.css"
 
 async function main() {
   const controller = new ClientContoller()
+  await controller.connect()
 
   // probably wanna use the less stupid history package later
   // or even full on react router?
@@ -14,7 +15,9 @@ async function main() {
 
   if (window.location.pathname === "/") {
     const gameId = await controller.joinNewGame()
-    window.history.replaceState(undefined, document.title, `/game/${gameId}`)
+    if (gameId) {
+      window.history.replaceState(undefined, document.title, `/game/${gameId}`)
+    }
   } else if ((pathMatch = window.location.pathname.match(gamePathRegex))) {
     controller.joinGame(pathMatch[1])
   }

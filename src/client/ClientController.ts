@@ -1,5 +1,3 @@
-import uuid from "uuid/v4"
-import { ClientMessageBase } from "../core/types"
 import { createSocket } from "./createSocket"
 import { sleep } from "./sleep"
 import { ClientSocket } from "./types"
@@ -32,19 +30,23 @@ export class ClientContoller {
   }
 
   move(direction: -1 | 1) {
-    this.sendMessage({ type: "move", direction })
+    this.socket?.send({ type: "move", direction })
   }
 
   async joinNewGame() {
-    // TODO
-    return ""
+    const socket = this.assertConnected()
+    const reply = await socket.request({ type: "new-room" })
+    return reply.id
   }
 
   async joinGame(id: string) {
     // TODO
   }
 
-  private sendMessage(props: ClientMessageBase) {
-    this.socket?.send({ id: uuid(), ...props })
+  private assertConnected(): ClientSocket {
+    if (!this.socket) {
+      throw new Error("Socket not connected")
+    }
+    return this.socket
   }
 }

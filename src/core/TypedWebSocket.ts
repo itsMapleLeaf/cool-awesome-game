@@ -1,3 +1,5 @@
+import uuid from "uuid/v4"
+
 type WebSocket = {
   send(data: any): void
 
@@ -23,8 +25,27 @@ type WebSocket = {
 export class TypedWebSocket<OutgoingMessage, IncomingMessage> {
   constructor(private socket: WebSocket) {}
 
-  send(message: OutgoingMessage) {
-    this.socket.send(JSON.stringify(message))
+  send(message: OutgoingMessage, id = uuid()) {
+    this.socket.send(JSON.stringify({ ...message, id }))
+    return id
+  }
+
+  request(message: OutgoingMessage) {
+    const id = this.send(message)
+
+    return new Promise<IncomingMessage>((resolve, reject) => {
+      const unlisten = this.onMessage((message) => {
+        if (message.id === id) {
+          resolve(message)
+          unlisten()
+        }
+      })
+
+      setTimeout(() => {
+        reject(new Error("Request timed out"))
+        unlisten()
+      }, 10000) // probably make this a constant
+    })
   }
 
   onOpen(listener: () => void) {
@@ -42,7 +63,7 @@ export class TypedWebSocket<OutgoingMessage, IncomingMessage> {
     return () => this.socket.removeEventListener("error", listener)
   }
 
-  onMessage(listener: (message: IncomingMessage) => void) {
+  onMessage(listener: (message: IncomingMessage & { id?: string }) => void) {
     const wrappedListener = ({ data }: { data: unknown }) => {
       listener(JSON.parse(String(data)))
     }

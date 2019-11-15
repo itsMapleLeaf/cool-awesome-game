@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react"
+import React, { useRef } from "react"
 import { Canvas, useFrame } from "react-three-fiber"
 import { Mesh } from "three"
 import { ClientContoller } from "./ClientController"
@@ -24,11 +24,6 @@ type Props = {
 }
 
 export default function App({ controller }: Props) {
-  useEffect(() => {
-    controller.connect()
-    return () => controller.disconnect()
-  }, [])
-
   useWindowEvent("keydown", (event) => {
     const bindings: { [_ in string]?: () => void } = {
       ArrowLeft: () => controller.move(-1),

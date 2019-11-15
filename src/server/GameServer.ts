@@ -18,8 +18,8 @@ export class GameServer {
       this.clients.set(client.id, client)
       console.info(`new client: ${client.id}`)
 
-      socket.onMessage((data) => {
-        this.handleClientMessage(data, client)
+      socket.onMessage((message) => {
+        this.handleClientMessage(message, client)
       })
 
       socket.onClose(() => {
@@ -32,11 +32,15 @@ export class GameServer {
     })
   }
 
-  handleClientMessage(message: ClientMessage, client: Client) {
+  handleClientMessage(
+    message: ClientMessage & { id?: string },
+    client: Client,
+  ) {
     switch (message.type) {
       case "new-room": {
         const game = new Game()
         this.games.set(game.id, game)
+        client.socket.send({ type: "new-room", id: game.id }, message.id)
         break
       }
     }
