@@ -40,9 +40,20 @@ export class GameServer {
       case "new-room": {
         const game = new Game()
         this.games.set(game.id, game)
-        client.socket.send({ type: "new-room", id: game.id }, message.id)
+        client.socket.send({ type: "new-room", roomId: game.id }, message.id)
+        break
+      }
+
+      case "join-room": {
+        const game = this.games.get(message.roomId)
+        if (game) {
+          game.players.push(client)
+        } else {
+          // reply with some error?
+        }
         break
       }
     }
+    console.log(this.games)
   }
 }

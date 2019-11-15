@@ -36,11 +36,11 @@ export class ClientContoller {
   async joinNewGame() {
     const socket = this.assertConnected()
     const reply = await socket.request({ type: "new-room" })
-    return reply.id
+    return reply.roomId
   }
 
-  async joinGame(id: string) {
-    // TODO
+  async joinGame(roomId: string) {
+    this.socket?.send({ type: "join-room", roomId })
   }
 
   private assertConnected(): ClientSocket {
