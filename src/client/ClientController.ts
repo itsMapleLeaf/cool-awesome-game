@@ -1,23 +1,8 @@
 import { ServerMessage } from "../core/types"
+import { createHttpClient } from "./createHttpClient"
 import { createSocket } from "./createSocket"
 import { sleep } from "./sleep"
 import { ClientSocket } from "./types"
-
-function createHttpClient(baseUrl: string) {
-  return {
-    async request(url: string, options?: RequestInit) {
-      const response = await fetch(`${baseUrl}${url}`, options)
-      const json = await response.json()
-
-      if (!response.ok) {
-        const message = json?.error?.message ?? "Unknown error"
-        throw new Error(`Request failed with ${response.status}: ${message}`)
-      }
-
-      return json
-    },
-  }
-}
 
 // TODO: use state machine (desperately needed)
 export class ClientContoller {
