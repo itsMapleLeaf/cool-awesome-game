@@ -7,7 +7,7 @@
   "scripts": {
     "dev:server": "ts-node-dev src/server/index.ts --no-notify --transpile-only",
     "dev:client": "webpack-dev-server --inline --hot",
-    "dev": "npm-run-all --parallel dev:*",
+    "dev": "npm-run-all --parallel --race --print-label dev:*",
     "build": "cross-env NODE_ENV=production webpack",
     "postinstall": "typesync"
   },
