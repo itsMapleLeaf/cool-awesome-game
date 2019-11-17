@@ -1,59 +1,120 @@
+import Koa from "koa"
+import bodyParser from "koa-bodyparser"
+import route from "koa-route"
 import WebSocket from "ws"
 import { TypedWebSocket } from "../core/TypedWebSocket"
 import { ClientMessage } from "../core/types"
 import { Client } from "./Client"
-import { Game } from "./Game"
+import { Room } from "./Room"
 import { ServerSocket } from "./types"
 
+const socketPort = 3001
+const httpPort = 3002
+
 export class GameServer {
-  private server = new WebSocket.Server({ port: 3001 })
+  private socketServer = this.createSocketServer()
+  private httpServer = this.createHttpServer()
+  private rooms = new Map<string, Room>()
   private clients = new Map<string, Client>()
-  private games = new Map<string, Game>()
 
-  constructor() {
-    this.server.on("connection", (baseSocket) => {
-      const socket: ServerSocket = new TypedWebSocket(baseSocket)
+  private createRoom(clientId: string) {
+    const client = this.clients.get(clientId)
+    if (!client) {
+      // TODO: make custom error class and use that
+      throw new Error("Invalid clientId")
+    }
 
-      const client = new Client(socket)
-      this.clients.set(client.id, client)
-      console.info(`new client: ${client.id}`)
+    const room = new Room()
+    this.rooms.set(room.id, room)
+    client.roomId = room.id
+    return room.id
+  }
 
-      socket.onMessage((message) => {
-        this.handleClientMessage(message, client)
-      })
+  private joinRoom(clientId: string, roomId: string) {
+    const client = this.clients.get(clientId)
+    if (!client) {
+      // TODO: make custom error class and use that
+      throw new Error("Invalid clientId")
+    }
 
-      socket.onClose(() => {
-        console.info(`disconnected: ${client.id}`)
-      })
+    const room = this.rooms.get(roomId)
+    if (!room) {
+      // TODO: make custom error class and use that
+      throw new Error("Invalid roomId")
+    }
+
+    client.roomId = roomId
+  }
+
+  private handleClientMessage(message: ClientMessage, client: Client) {
+    // dunno lol
+  }
+
+  private handleSocketConnection(socket: ServerSocket) {
+    const client = new Client(socket)
+    this.clients.set(client.id, client)
+    client.sendClientInit()
+
+    console.info(`new client: ${client.id}`)
+
+    socket.onMessage((message) => {
+      this.handleClientMessage(message, client)
     })
 
-    this.server.on("listening", () => {
-      console.info(`listening on http://localhost:${this.server.options.port}`)
+    socket.onClose(() => {
+      console.info(`disconnected: ${client.id}`)
     })
   }
 
-  handleClientMessage(
-    message: ClientMessage & { id?: string },
-    client: Client,
-  ) {
-    switch (message.type) {
-      case "new-room": {
-        const game = new Game()
-        this.games.set(game.id, game)
-        client.socket.send({ type: "new-room", roomId: game.id }, message.id)
-        break
-      }
+  private createSocketServer() {
+    const server = new WebSocket.Server({ port: socketPort })
 
-      case "join-room": {
-        const game = this.games.get(message.roomId)
-        if (game) {
-          game.players.push(client)
-        } else {
-          // reply with some error?
-        }
-        break
+    server.on("connection", (socket) => {
+      this.handleSocketConnection(new TypedWebSocket(socket))
+    })
+
+    server.on("listening", () => {
+      console.info(
+        `socket listening on http://localhost:${server.options.port}`,
+      )
+    })
+
+    return server
+  }
+
+  private createHttpServer() {
+    const server = new Koa()
+
+    server.use(async (ctx, next) => {
+      try {
+        await next()
+      } catch (error) {
+        ctx.status = 500
+        ctx.body = { error: { message: "Internal server error" } }
       }
-    }
-    console.log(this.games)
+    })
+
+    server.use(bodyParser())
+
+    server.use(
+      route.post("/create-room", async (ctx) => {
+        const roomId = this.createRoom(String(ctx.query.clientId))
+        ctx.body = { data: { roomId } }
+      }),
+    )
+
+    server.use(
+      route.post("/join-room", async (ctx) => {
+        const { clientId, roomId } = ctx.query
+        this.joinRoom(String(clientId), String(roomId))
+        ctx.body = {}
+      }),
+    )
+
+    server.listen(httpPort, () => {
+      console.info(`http listening on http://localhost:${httpPort}`)
+    })
+
+    return server
   }
 }
