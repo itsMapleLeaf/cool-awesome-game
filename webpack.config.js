@@ -2,6 +2,7 @@
 const merge = require("webpack-merge")
 const { join } = require("path")
 const HtmlWebpackPlugin = require("html-webpack-plugin")
+const nodeExternals = require("webpack-node-externals")
 
 /** @type {import('webpack').Configuration} */
 const baseConfig = {
@@ -21,7 +22,6 @@ const baseConfig = {
     maxAssetSize: Infinity,
     maxEntrypointSize: Infinity,
   },
-  stats: "normal",
   mode: process.env.NODE_ENV === "production" ? "production" : "development",
 }
 
@@ -49,7 +49,8 @@ const serverConfig = merge(baseConfig, {
     libraryTarget: "commonjs",
   },
   target: "node",
-  externals: ["ws"],
+  mode: "none",
+  externals: nodeExternals(),
 })
 
 module.exports = [clientConfig, serverConfig]
