@@ -55,15 +55,17 @@ export class ClientContoller {
   }
 
   async joinNewGame(): Promise<string> {
-    const data = await this.http.request(
+    const result = await this.http.request(
       `/create-room?clientId=${this.clientId}`,
+      { method: "post" },
     )
-    return data.roomId
+    return result.data.roomId
   }
 
   async joinGame(roomId: string): Promise<void> {
     await this.http.request(
       `/join-room?clientId=${this.clientId}&roomId=${roomId}`,
+      { method: "post" },
     )
   }
 
