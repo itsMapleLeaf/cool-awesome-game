@@ -1,3 +1,4 @@
+import cors from "@koa/cors"
 import Koa from "koa"
 import bodyParser from "koa-bodyparser"
 import route from "koa-route"
@@ -95,6 +96,7 @@ export class GameServer {
     })
 
     server.use(bodyParser())
+    server.use(cors())
 
     server.use(
       route.post("/create-room", async (ctx) => {
