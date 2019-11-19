@@ -1,3 +1,4 @@
 export type ClientMessage = { type: "move-left" } | { type: "move-right" }
 
-export type ServerMessage = { type: "client-init"; clientId: string }
+// dunno what server messages we need yet
+export type ServerMessage = void
