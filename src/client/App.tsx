@@ -1,60 +1,60 @@
+import { Client, Room } from "colyseus.js"
 import React, { useEffect, useRef } from "react"
-import { Route, useHistory } from "react-router-dom"
 import { Canvas, useFrame } from "react-three-fiber"
 import { Mesh } from "three"
-import { ClientContoller } from "./ClientController"
+import { GameplayState } from "../core/GameplayState"
+import { PlayerState } from "../core/PlayerState"
+import { useInstanceValue } from "./useInstanceValue"
+import { useWindowEvent } from "./useWindowEvent"
 
 export default function App() {
-  const controller = useRef(new ClientContoller())
-  const history = useHistory()
-
-  useEffect(() => {
-    controller.current.connect()
-  }, [])
-
-  const joinNewGame = async () => {
-    const roomId = await controller.current.joinNewGame()
-    history.push(`/game/${roomId}`)
-  }
-
   return (
-    <>
-      <Route exact path="/">
-        <button onClick={joinNewGame}>join new game</button>
-      </Route>
-      <Route exact path="/game/:roomId">
-        <Canvas gl2>
-          <DemoBox />
-        </Canvas>
-      </Route>
-    </>
+    <Canvas gl2>
+      <Game />
+    </Canvas>
   )
-
-  // useWindowEvent("keydown", (event) => {
-  //   const bindings: { [_ in string]?: () => void } = {
-  //     ArrowLeft: () => controller.move(-1),
-  //     ArrowRight: () => controller.move(1),
-  //   }
-  //   // TODO: use optional chaining lol
-  //   const fn = bindings[event.key]
-  //   if (fn) fn()
-  // })
-  // return (
-  //   <Canvas gl2>
-  //     <DemoBox />
-  //   </Canvas>
-  // )
 }
 
-function DemoBox() {
-  const ref = useRef<Mesh>()
+function Game() {
+  const client = useInstanceValue(() => new Client(`ws://localhost:3001`))
+  const roomRef = useRef<Room>()
+  const stateRef = useRef<GameplayState>()
+  const meshRef = useRef<Mesh>(null)
+
+  useEffect(() => {
+    client.joinOrCreate("gameplay").then((room) => {
+      roomRef.current = room
+
+      room.onStateChange((state) => {
+        stateRef.current = state
+      })
+    })
+    return () => roomRef.current?.leave()
+  }, [])
+
+  useWindowEvent("keydown", (event) => {
+    const room = roomRef.current
+
+    const bindings: { [_ in string]?: () => void } = {
+      ArrowLeft: () => room?.send({ type: "move-left" }),
+      ArrowRight: () => room?.send({ type: "move-right" }),
+    }
+
+    bindings[event.key]?.()
+  })
 
   useFrame(() => {
-    ref.current!.rotation.x = ref.current!.rotation.y += 0.01
+    const mesh = meshRef.current
+
+    const sessionId = roomRef.current?.sessionId
+    if (!sessionId) return
+
+    const player: PlayerState | undefined = stateRef.current?.players[sessionId]
+    mesh?.position.set(player?.position ?? 0, 0, 0)
   })
 
   return (
-    <mesh ref={ref}>
+    <mesh ref={meshRef}>
       <boxBufferGeometry attach="geometry" args={[1, 1, 1]} />
       <meshNormalMaterial attach="material" />
     </mesh>
