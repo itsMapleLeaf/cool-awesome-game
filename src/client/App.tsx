@@ -1,6 +1,6 @@
 import { Client, Room } from "colyseus.js"
-import React, { useEffect, useRef } from "react"
-import { Canvas, useFrame } from "react-three-fiber"
+import React, { useEffect, useRef, useState } from "react"
+import { Canvas } from "react-three-fiber"
 import { Mesh } from "three"
 import { GameplayState } from "../core/GameplayState"
 import { PlayerState } from "../core/PlayerState"
@@ -18,15 +18,15 @@ export default function App() {
 function Game() {
   const client = useInstanceValue(() => new Client(`ws://localhost:3001`))
   const roomRef = useRef<Room>()
-  const stateRef = useRef<GameplayState>()
+  const [state, setState] = useState<GameplayState>()
   const meshRef = useRef<Mesh>(null)
 
   useEffect(() => {
     client.joinOrCreate("gameplay").then((room) => {
       roomRef.current = room
 
-      room.onStateChange((state) => {
-        stateRef.current = state
+      room.onStateChange((state: GameplayState) => {
+        setState(state.toJSON() as any) // i hate this
       })
     })
     return () => roomRef.current?.leave()
@@ -43,20 +43,16 @@ function Game() {
     bindings[event.key]?.()
   })
 
-  useFrame(() => {
-    const mesh = meshRef.current
-
-    const sessionId = roomRef.current?.sessionId
-    if (!sessionId) return
-
-    const player: PlayerState | undefined = stateRef.current?.players[sessionId]
-    mesh?.position.set(player?.position ?? 0, 0, 0)
-  })
+  const players: PlayerState[] = Object.values(state?.players ?? {})
 
   return (
-    <mesh ref={meshRef}>
-      <boxBufferGeometry attach="geometry" args={[1, 1, 1]} />
-      <meshNormalMaterial attach="material" />
-    </mesh>
+    <>
+      {players.map((player, index) => (
+        <mesh key={index} ref={meshRef} position={[player.position, 0, 0]}>
+          <boxBufferGeometry attach="geometry" args={[1, 1, 1]} />
+          <meshNormalMaterial attach="material" />
+        </mesh>
+      ))}
+    </>
   )
 }
