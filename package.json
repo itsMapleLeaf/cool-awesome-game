@@ -7,12 +7,13 @@
   "scripts": {
     "dev:server": "ts-node-dev src/server/index.ts --no-notify --transpileOnly",
     "dev:client": "webpack-dev-server --inline --hot",
-    "dev": "npm-run-all --parallel --race --print-label dev:*",
+    "dev": "cross-env FORCE_COLOR=1 npm-run-all --parallel --race --print-label dev:*",
     "build": "cross-env NODE_ENV=production webpack",
     "postinstall": "typesync"
   },
   "dependencies": {
     "@babel/runtime": "^7.7.2",
+    "chalk": "^3.0.0",
     "cross-env": "^6.0.3",
     "deep-diff": "^1.0.2",
     "immer": "^5.0.0",

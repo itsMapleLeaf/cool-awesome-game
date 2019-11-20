@@ -11,7 +11,7 @@ export type ServerRoomOptions<State> = {
 export class ServerRoom<State = unknown, IncomingMessage = unknown> {
   private state: State
   private readonly clients = new Map<string, ServerClient>()
-  private server: FrameworkServer
+  private readonly server: FrameworkServer
 
   readonly id: string
   readonly onJoin = new EventChannel<[ServerClient]>()
