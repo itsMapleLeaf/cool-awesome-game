@@ -1,3 +1,4 @@
+import { diff } from "deep-diff"
 import WebSocket from "isomorphic-ws"
 import uuid from "uuid/v4"
 import { EventChannel } from "./EventChannel"
@@ -21,15 +22,21 @@ export class Server<State, IncomingMessage> {
   }
 
   setState(getNewState: (oldState: State) => State) {
-    this.state = getNewState(this.state)
-    this.broadcast({ type: "state", state: this.state })
+    const newState = getNewState(this.state)
+    const stateDiff = diff(this.state, newState)
+
+    this.state = newState
+    if (stateDiff) {
+      this.broadcast({ type: "update-state", changes: stateDiff })
+    }
   }
 
   private createSocketServer() {
     const server = new WebSocket.Server({ port: 3001 })
 
     server.on("connection", (socket) => {
-      const client = new ServerClient(uuid(), socket)
+      const client = new ServerClient<State>(uuid(), socket)
+      client.send({ type: "state", state: this.state })
       this.clients.add(client)
       this.onConnect.send(client)
 

@@ -1,10 +1,16 @@
+import { applyChange, Diff } from "deep-diff"
+import produce from "immer"
 import WebSocket from "isomorphic-ws"
 import { sleep } from "../common/sleep"
 import { EventChannel } from "./EventChannel"
 import { ClientMessage, ServerMessage } from "./types"
 
+// using a symbol for a lack of state to support _any_ state value
+const noState = Symbol()
+
 export class Client<State, OutgoingMessage> {
   private socket?: WebSocket
+  private state: State | typeof noState = noState
 
   onConnected = new EventChannel()
   onDisconnected = new EventChannel()
@@ -36,9 +42,20 @@ export class Client<State, OutgoingMessage> {
     socket.onmessage = ({ data }) => {
       const message: ServerMessage<State> = JSON.parse(String(data))
       switch (message.type) {
-        case "state":
+        case "state": {
+          this.state = message.state
           this.onNewState.send(message.state)
           break
+        }
+
+        case "update-state": {
+          // maybe request the full state if we don't have local state?
+          if (this.state !== noState) {
+            this.state = applyStateChanges(this.state, message.changes)
+            this.onNewState.send(this.state)
+          }
+          break
+        }
       }
     }
   }
@@ -64,4 +81,12 @@ export class Client<State, OutgoingMessage> {
     this.onDisconnected.clear()
     this.onNewState.clear()
   }
+}
+
+function applyStateChanges<S>(state: S, changes: Diff<S, S>[]) {
+  return produce(state, (draft) => {
+    for (const change of changes) {
+      applyChange(draft, {}, change as any)
+    }
+  })
 }
