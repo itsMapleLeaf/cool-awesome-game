@@ -6,24 +6,18 @@ import Game from "./Game"
 import { GameClient } from "./types"
 import { useWindowEvent } from "./useWindowEvent"
 
-type GameStatus = "connecting" | "gameplay"
-
 export default function App() {
   const [client, setClient] = useState<GameClient>()
-  const [status, setStatus] = useState<GameStatus>("connecting")
   const [gameState, setGameState] = useState<GameState>(initialGameState)
 
   useEffect(() => {
     const client: GameClient = new Client(`ws://localhost:3001`)
 
     client.onConnected.listen(() => {
-      setStatus("gameplay")
       setClient(client)
     })
 
-    client.onDisconnected.listen(() => {
-      setStatus("connecting")
-    })
+    client.onDisconnected.listen(() => {})
 
     client.onNewState.listen(setGameState)
 
@@ -39,15 +33,9 @@ export default function App() {
     bindings[event.key]?.()
   })
 
-  switch (status) {
-    case "connecting":
-      return <p>Connecting...</p>
-
-    case "gameplay":
-      return (
-        <Canvas gl2>
-          <Game state={gameState} />
-        </Canvas>
-      )
-  }
+  return (
+    <Canvas gl2>
+      <Game state={gameState} />
+    </Canvas>
+  )
 }
