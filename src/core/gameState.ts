@@ -25,7 +25,7 @@ export const addPlayer = (id: string) =>
 
 export const removePlayer = (id: string) =>
   produce((draft: Draft<GameState>) => {
-    draft.players = draft.players.filter((p) => p.id != id)
+    draft.players = draft.players.filter((p) => p.id !== id)
   })
 
 export const movePlayer = (id: string, delta: number) =>
