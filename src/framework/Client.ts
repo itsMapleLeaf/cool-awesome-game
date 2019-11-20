@@ -52,7 +52,9 @@ export class Client {
   }
 
   joinRoom<State, OutgoingMessage>(id: string) {
-    if (!this.socket) return
+    if (!this.socket) {
+      throw new Error("Attempted to join room before connecting")
+    }
 
     this.socket.send({ type: "join-room", roomId: id })
 
