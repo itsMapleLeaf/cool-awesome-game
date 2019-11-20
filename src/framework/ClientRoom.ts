@@ -30,6 +30,8 @@ export class ClientRoom<State = unknown, OutgoingMessage = unknown> {
     switch (message.type) {
       case "joined-room": {
         this.onJoin.send()
+        this.state = message.state
+        this.onNewState.send(message.state)
         break
       }
 

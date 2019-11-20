@@ -2,6 +2,7 @@ import { diff } from "deep-diff"
 import { EventChannel } from "./EventChannel"
 import { Server } from "./Server"
 import { ServerClient } from "./ServerClient"
+import { ClientMessage } from "./types"
 
 export type ServerRoomOptions<State> = {
   id: string
@@ -24,24 +25,54 @@ export class ServerRoom<State = unknown, IncomingMessage = unknown> {
     this.server = server
   }
 
+  handleClientMessage(
+    client: ServerClient,
+    message: ClientMessage<IncomingMessage>,
+  ) {
+    switch (message.type) {
+      case "join-room": {
+        this.addClient(client)
+        break
+      }
+
+      case "leave-room": {
+        this.removeClient(client.id)
+        break
+      }
+
+      case "room-client-message": {
+        this.onMessage.send(client, message.message)
+        break
+      }
+    }
+  }
+
   addClient(client: ServerClient) {
     this.clients.set(client.id, client)
+    this.onJoin.send(client)
     client.send({ type: "joined-room", roomId: this.id, state: this.state })
   }
 
   removeClient(clientId: string) {
     const client = this.clients.get(clientId)
-    client?.send({ type: "left-room", roomId: this.id })
+    if (client) {
+      this.onLeave.send(client)
+      client.send({ type: "left-room", roomId: this.id })
+    }
     this.clients.delete(clientId)
   }
 
   setState(getNewState: (oldState: State) => State) {
     const newState = getNewState(this.state)
-    const stateDiff = diff(this.state, newState)
+    const changes = diff(this.state, newState)
 
-    if (stateDiff) {
+    if (changes) {
       this.state = newState
-      // this.broadcast({ type: "update-state", changes: stateDiff })
+      this.server.broadcast({
+        type: "room-state-update",
+        roomId: this.id,
+        changes,
+      })
     }
   }
 }

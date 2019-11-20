@@ -37,8 +37,11 @@ export class Server {
       })
 
       socket.on("close", () => {
-        this.onDisconnect.send(client)
+        for (const [, room] of this.rooms) {
+          room.removeClient(client.id)
+        }
         this.clients.delete(client)
+        this.onDisconnect.send(client)
       })
     })
 
@@ -51,29 +54,17 @@ export class Server {
     return server
   }
 
-  private handleClientMessage(client: ServerClient, message: ClientMessage) {
-    switch (message.type) {
-      case "join-room": {
-        const room = this.rooms.get(message.roomId)
-        room?.addClient(client)
-        break
-      }
-
-      case "leave-room": {
-        // TODO
-        break
-      }
-
-      case "room-client-message": {
-        // TODO
-        break
-      }
+  broadcast(message: ServerMessage) {
+    for (const client of this.clients) {
+      client.send(message)
     }
   }
 
-  private broadcast(message: ServerMessage) {
-    for (const client of this.clients) {
-      client.send(message)
+  private handleClientMessage(client: ServerClient, message: ClientMessage) {
+    if ("roomId" in message) {
+      const room = this.rooms.get(message.roomId)
+      // TODO: send back error if room doesn't exist
+      room?.handleClientMessage(client, message)
     }
   }
 }
