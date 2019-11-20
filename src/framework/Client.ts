@@ -1,23 +1,18 @@
-import { applyChange, Diff } from "deep-diff"
-import produce from "immer"
 import WebSocket from "isomorphic-ws"
 import { sleep } from "../common/sleep"
+import { ClientRoom } from "./ClientRoom"
 import { EventChannel } from "./EventChannel"
 import { ClientMessage, ServerMessage } from "./types"
 
 type ClientStatus = "offline" | "connecting" | "online"
 
-// using a symbol for a lack of state to support _any_ state value
-const noState = Symbol()
-
-export class Client<State, OutgoingMessage> {
+export class Client {
   private socket?: WebSocket
-  private state: State | typeof noState = noState
   private status: ClientStatus = "offline"
+  private rooms = new Map<string, ClientRoom>()
 
-  onConnected = new EventChannel()
-  onDisconnected = new EventChannel()
-  onNewState = new EventChannel<[State]>()
+  readonly onConnected = new EventChannel()
+  readonly onDisconnected = new EventChannel()
 
   connect(url: string) {
     if (this.status !== "offline") return
@@ -45,28 +40,8 @@ export class Client<State, OutgoingMessage> {
     }
 
     socket.onmessage = ({ data }) => {
-      const message: ServerMessage<State> = JSON.parse(String(data))
-      switch (message.type) {
-        case "state": {
-          this.state = message.state
-          this.onNewState.send(message.state)
-          break
-        }
-
-        case "update-state": {
-          // maybe request the full state if we don't have local state?
-          if (this.state !== noState) {
-            this.state = applyStateChanges(this.state, message.changes)
-            this.onNewState.send(this.state)
-          }
-          break
-        }
-      }
+      this.handleServerMessage(JSON.parse(String(data)))
     }
-  }
-
-  sendMessage(message: OutgoingMessage) {
-    this.send({ type: "client-message", message })
   }
 
   disconnect() {
@@ -80,18 +55,29 @@ export class Client<State, OutgoingMessage> {
 
     this.onConnected.clear()
     this.onDisconnected.clear()
-    this.onNewState.clear()
   }
 
-  private send(data: ClientMessage<OutgoingMessage>) {
+  joinRoom<State, OutgoingMessage>(id: string) {
+    this.send({ type: "join-room", roomId: id })
+
+    // TODO: pass socket wrapper instead of "this"
+    const room = new ClientRoom<State, OutgoingMessage>({ id }, this)
+    this.rooms.set(id, room as any) // variance issue
+    return room
+  }
+
+  send(data: ClientMessage) {
     this.socket?.send(JSON.stringify(data))
   }
-}
 
-function applyStateChanges<S>(state: S, changes: Diff<S, S>[]) {
-  return produce(state, (draft) => {
-    for (const change of changes) {
-      applyChange(draft, {}, change as any)
+  private handleServerMessage(message: ServerMessage) {
+    if ("roomId" in message) {
+      const room = this.rooms.get(message.roomId)
+      room?.handleServerMessage(message)
+
+      if (message.type === "left-room") {
+        this.rooms.delete(message.roomId)
+      }
     }
-  })
+  }
 }

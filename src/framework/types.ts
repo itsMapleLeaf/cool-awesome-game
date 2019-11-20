@@ -1,7 +1,12 @@
 import { Diff } from "deep-diff"
 
-export type ClientMessage<D> = { type: "client-message"; message: D }
+export type ClientMessage<Message = unknown> =
+  | { type: "join-room"; roomId: string }
+  | { type: "leave-room"; roomId: string }
+  | { type: "room-client-message"; roomId: string; message: Message }
 
-export type ServerMessage<State> =
-  | { type: "state"; state: State }
-  | { type: "update-state"; changes: Diff<State, State>[] }
+export type ServerMessage<State = unknown> =
+  | { type: "joined-room"; roomId: string; state: State }
+  | { type: "left-room"; roomId: string }
+  | { type: "room-state"; roomId: string; state: State }
+  | { type: "room-state-update"; roomId: string; changes: Diff<State>[] }

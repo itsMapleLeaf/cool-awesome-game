@@ -8,26 +8,29 @@ import {
 import { GameClientMessage } from "../core/messageTypes"
 import { Server } from "../framework/Server"
 
-const server = new Server<GameState, GameClientMessage>({
+const server = new Server()
+
+const room = server.createRoom<GameState, GameClientMessage>({
+  id: "gameplay",
   initialState: initialGameState,
 })
 
-server.onConnect.listen((client) => {
-  server.setState(addPlayer(client.id))
+room.onJoin.listen((client) => {
+  room.setState(addPlayer(client.id))
 })
 
-server.onDisconnect.listen((client) => {
-  server.setState(removePlayer(client.id))
+room.onLeave.listen((client) => {
+  room.setState(removePlayer(client.id))
 })
 
-server.onMessage.listen((client, message) => {
+room.onMessage.listen((client, message) => {
   switch (message.type) {
     case "move-left":
-      server.setState(movePlayer(client.id, -1))
+      room.setState(movePlayer(client.id, -1))
       break
 
     case "move-right":
-      server.setState(movePlayer(client.id, 1))
+      room.setState(movePlayer(client.id, 1))
       break
   }
 })

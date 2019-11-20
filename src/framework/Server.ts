@@ -1,48 +1,39 @@
-import { diff } from "deep-diff"
 import WebSocket from "isomorphic-ws"
 import uuid from "uuid/v4"
 import { EventChannel } from "./EventChannel"
+import { ServerClient } from "./ServerClient"
+import { ServerRoom, ServerRoomOptions } from "./ServerRoom"
 import { ClientMessage, ServerMessage } from "./types"
 
-type ServerOptions<State> = {
-  initialState: State
-}
+export class Server {
+  private readonly clients = new Set<ServerClient>()
+  private readonly rooms = new Map<string, ServerRoom>()
 
-export class Server<State, IncomingMessage> {
-  private server = this.createSocketServer()
-  private state: State
-  private clients = new Set<ServerClient<State>>()
+  readonly onConnect = new EventChannel<[ServerClient]>()
+  readonly onDisconnect = new EventChannel<[ServerClient]>()
 
-  onConnect = new EventChannel<[ServerClient<State>]>()
-  onDisconnect = new EventChannel<[ServerClient<State>]>()
-  onMessage = new EventChannel<[ServerClient<State>, IncomingMessage]>()
-
-  constructor(options: ServerOptions<State>) {
-    this.state = options.initialState
+  constructor() {
+    this.createSocketServer()
   }
 
-  setState(getNewState: (oldState: State) => State) {
-    const newState = getNewState(this.state)
-    const stateDiff = diff(this.state, newState)
-
-    this.state = newState
-    if (stateDiff) {
-      this.broadcast({ type: "update-state", changes: stateDiff })
-    }
+  createRoom<State, IncomingMessage>(options: ServerRoomOptions<State>) {
+    // passing "this" is an anti-pattern and breaks encapsulation
+    // TODO: create a simple wrapper around the websocket server and pass that instead
+    const room = new ServerRoom<State, IncomingMessage>(options, this)
+    this.rooms.set(room.id, room as any) // variance issue
+    return room
   }
 
   private createSocketServer() {
     const server = new WebSocket.Server({ port: 3001 })
 
     server.on("connection", (socket) => {
-      const client = new ServerClient<State>(uuid(), socket)
-      client.send({ type: "state", state: this.state })
+      const client = new ServerClient(uuid(), socket)
       this.clients.add(client)
       this.onConnect.send(client)
 
       socket.on("message", (data) => {
-        const message: ClientMessage<IncomingMessage> = JSON.parse(String(data))
-        this.onMessage.send(client, message.message)
+        this.handleClientMessage(client, JSON.parse(String(data)))
       })
 
       socket.on("close", () => {
@@ -60,17 +51,29 @@ export class Server<State, IncomingMessage> {
     return server
   }
 
-  private broadcast(message: ServerMessage<State>) {
+  private handleClientMessage(client: ServerClient, message: ClientMessage) {
+    switch (message.type) {
+      case "join-room": {
+        const room = this.rooms.get(message.roomId)
+        room?.addClient(client)
+        break
+      }
+
+      case "leave-room": {
+        // TODO
+        break
+      }
+
+      case "room-client-message": {
+        // TODO
+        break
+      }
+    }
+  }
+
+  private broadcast(message: ServerMessage) {
     for (const client of this.clients) {
       client.send(message)
     }
-  }
-}
-
-class ServerClient<State> {
-  constructor(public id: string, public socket: WebSocket) {}
-
-  send(message: ServerMessage<State>) {
-    this.socket.send(JSON.stringify(message))
   }
 }
