@@ -1,5 +1,5 @@
 import { GameState } from "../core/gameState"
 import { GameClientMessage } from "../core/messageTypes"
-import { Client } from "../framework/Client"
+import { ClientRoom } from "../framework/ClientRoom"
 
-export type GameClient = Client<GameState, GameClientMessage>
+export type GameClientRoom = ClientRoom<GameState, GameClientMessage>

@@ -4,19 +4,20 @@ import { Key } from "ts-key-enum"
 import { GameState, initialGameState } from "../core/gameState"
 import { GameClientMessage } from "../core/messageTypes"
 import { Client } from "../framework/Client"
-import { ClientRoom } from "../framework/ClientRoom"
 import GameView from "./GameView"
-import { GameClient } from "./types"
+import { GameClientRoom } from "./types"
 import { useWindowEvent } from "./useWindowEvent"
 
-type Props = { roomId: string }
+type Props = {
+  roomId: string
+}
 
 function Game({ roomId }: Props) {
-  const [room, setRoom] = useState<ClientRoom>()
+  const [room, setRoom] = useState<GameClientRoom>()
   const [gameState, setGameState] = useState<GameState>(initialGameState)
 
   useEffect(() => {
-    const client: GameClient = new Client()
+    const client = new Client()
 
     client.connect(`ws://localhost:3001`)
 
