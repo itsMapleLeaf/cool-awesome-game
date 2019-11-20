@@ -25,6 +25,7 @@ module.exports = {
   rules: {
     "no-unused-vars": "off",
     "react/jsx-key": "warn",
+    "react/jsx-no-useless-fragment": "warn",
     "@typescript-eslint/consistent-type-definitions": ["error", "type"],
   },
 }
