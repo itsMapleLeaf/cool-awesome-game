@@ -62,9 +62,7 @@ export class Client {
   }
 
   leaveRoom(roomId: string) {
-    if (!this.socket) return
-
-    this.socket.send({ type: "leave-room", roomId })
+    this.socket?.send({ type: "leave-room", roomId })
   }
 
   private handleServerMessage(message: ServerMessage) {
