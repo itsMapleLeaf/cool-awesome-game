@@ -1,15 +1,15 @@
 import {
   addPlayer,
   GameState,
-  initialState,
+  initialGameState,
   movePlayer,
   removePlayer,
 } from "../core/gameState"
-import { GameClientMessage } from "../core/types"
+import { GameClientMessage } from "../core/messageTypes"
 import { Server } from "../framework/Server"
 
 const server = new Server<GameState, GameClientMessage>({
-  initialState,
+  initialState: initialGameState,
 })
 
 server.onConnect.listen((client) => {

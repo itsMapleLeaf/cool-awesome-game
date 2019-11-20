@@ -10,7 +10,7 @@ export type PlayerState = {
   position: number
 }
 
-export const initialState: GameState = {
+export const initialGameState: GameState = {
   players: [],
 }
 

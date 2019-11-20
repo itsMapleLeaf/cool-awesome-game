@@ -1,26 +1,17 @@
 import React, { useEffect, useState } from "react"
 import { Canvas } from "react-three-fiber"
-import { GameState, initialState } from "../core/gameState"
-import { GameClientMessage } from "../core/types"
+import { GameState, initialGameState } from "../core/gameState"
 import { Client } from "../framework/Client"
+import Game from "./Game"
+import { GameClient } from "./types"
 import { useWindowEvent } from "./useWindowEvent"
-
-export default function App() {
-  return (
-    <Canvas gl2>
-      <Game />
-    </Canvas>
-  )
-}
 
 type GameStatus = "connecting" | "gameplay"
 
-type GameClient = Client<GameState, GameClientMessage>
-
-function Game() {
+export default function App() {
   const [client, setClient] = useState<GameClient>()
   const [status, setStatus] = useState<GameStatus>("connecting")
-  const [gameState, setGameState] = useState<GameState>(initialState)
+  const [gameState, setGameState] = useState<GameState>(initialGameState)
 
   useEffect(() => {
     const client: GameClient = new Client(`ws://localhost:3001`)
@@ -50,19 +41,13 @@ function Game() {
 
   switch (status) {
     case "connecting":
-      // i dunno how to render text with three
-      return null
+      return <p>Connecting...</p>
 
     case "gameplay":
       return (
-        <>
-          {gameState.players.map((player, index) => (
-            <mesh key={index} position={[player.position, 0, 0]}>
-              <boxBufferGeometry attach="geometry" args={[1, 1, 1]} />
-              <meshNormalMaterial attach="material" />
-            </mesh>
-          ))}
-        </>
+        <Canvas gl2>
+          <Game state={gameState} />
+        </Canvas>
       )
   }
 }
