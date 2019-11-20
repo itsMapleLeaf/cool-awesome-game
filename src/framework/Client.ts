@@ -9,7 +9,7 @@ type ClientStatus = "offline" | "connecting" | "online"
 export class Client {
   private socket?: FrameworkClientSocket
   private status: ClientStatus = "offline"
-  private rooms = new Map<string, ClientRoom>()
+  private readonly rooms = new Map<string, ClientRoom>()
 
   readonly onConnected = new EventChannel()
   readonly onDisconnected = new EventChannel()
