@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react"
 import { Canvas } from "react-three-fiber"
+import { Key } from "ts-key-enum"
 import { GameState, initialGameState } from "../core/gameState"
 import { GameClientMessage } from "../core/messageTypes"
 import { Client } from "../framework/Client"
@@ -36,8 +37,8 @@ export default function App() {
 
   useWindowEvent("keydown", (event) => {
     const bindings: { [_ in string]?: () => void } = {
-      ArrowLeft: () => room?.sendMessage({ type: "move-left" }),
-      ArrowRight: () => room?.sendMessage({ type: "move-right" }),
+      [Key.ArrowLeft]: () => room?.sendMessage({ type: "move-left" }),
+      [Key.ArrowRight]: () => room?.sendMessage({ type: "move-right" }),
     }
 
     bindings[event.key]?.()

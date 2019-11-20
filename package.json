@@ -54,6 +54,7 @@
     "react-three-fiber": "^3.0.14",
     "style-loader": "^1.0.0",
     "three": "^0.110.0",
+    "ts-key-enum": "2.x.x",
     "ts-node-dev": "^1.0.0-pre.44",
     "typescript": "~3.7.2",
     "typesync": "^0.6.1",
