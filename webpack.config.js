@@ -18,11 +18,16 @@ const baseConfig = {
   resolve: {
     extensions: [".js", ".ts", ".tsx"],
   },
+  mode: process.env.NODE_ENV === "production" ? "production" : "development",
   performance: {
     maxAssetSize: Infinity,
     maxEntrypointSize: Infinity,
   },
-  mode: process.env.NODE_ENV === "production" ? "production" : "development",
+  stats: {
+    modules: false,
+    entrypoints: false,
+    hash: false,
+  },
 }
 
 const clientConfig = merge(baseConfig, {
