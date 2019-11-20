@@ -1,6 +1,6 @@
 import { Client, Room } from "colyseus"
 import { GameplayState } from "../core/GameplayState"
-import { ClientMessage } from "../core/types"
+import { GameClientMessage } from "../core/types"
 
 export class GameplayRoom extends Room<GameplayState> {
   maxClients = 2
@@ -17,7 +17,7 @@ export class GameplayRoom extends Room<GameplayState> {
     this.state.removePlayer(client.sessionId)
   }
 
-  onMessage(client: Client, data: ClientMessage): void {
+  onMessage(client: Client, data: GameClientMessage): void {
     const player = this.state.getPlayer(client.id)
     switch (data.type) {
       case "move-left":

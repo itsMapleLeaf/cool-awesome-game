@@ -1,4 +1,4 @@
-export type ClientMessage = { type: "move-left" } | { type: "move-right" }
+export type GameClientMessage = { type: "move-left" } | { type: "move-right" }
 
 // dunno what server messages we need yet
-export type ServerMessage = void
+export type GameServerMessage = void

@@ -1,10 +1,8 @@
-import { Client, Room } from "colyseus.js"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Canvas } from "react-three-fiber"
-import { Mesh } from "three"
-import { GameplayState } from "../core/GameplayState"
-import { PlayerState } from "../core/PlayerState"
-import { useInstanceValue } from "./useInstanceValue"
+import { GameState, initialState } from "../core/gameState"
+import { GameClientMessage } from "../core/types"
+import { Client } from "../framework/Client"
 import { useWindowEvent } from "./useWindowEvent"
 
 export default function App() {
@@ -15,44 +13,56 @@ export default function App() {
   )
 }
 
+type GameStatus = "connecting" | "gameplay"
+
+type GameClient = Client<GameState, GameClientMessage>
+
 function Game() {
-  const client = useInstanceValue(() => new Client(`ws://localhost:3001`))
-  const roomRef = useRef<Room>()
-  const [state, setState] = useState<GameplayState>()
-  const meshRef = useRef<Mesh>(null)
+  const [client, setClient] = useState<GameClient>()
+  const [status, setStatus] = useState<GameStatus>("connecting")
+  const [gameState, setGameState] = useState<GameState>(initialState)
 
   useEffect(() => {
-    client.joinOrCreate("gameplay").then((room) => {
-      roomRef.current = room
+    const client: GameClient = new Client(`ws://localhost:3001`)
 
-      room.onStateChange((state: GameplayState) => {
-        setState(state.toJSON() as any) // i hate this
-      })
+    client.onConnected.listen(() => {
+      setStatus("gameplay")
+      setClient(client)
     })
-    return () => roomRef.current?.leave()
+
+    client.onDisconnected.listen(() => {
+      setStatus("connecting")
+    })
+
+    client.onNewState.listen(setGameState)
+
+    return () => client.disconnect()
   }, [])
 
   useWindowEvent("keydown", (event) => {
-    const room = roomRef.current
-
     const bindings: { [_ in string]?: () => void } = {
-      ArrowLeft: () => room?.send({ type: "move-left" }),
-      ArrowRight: () => room?.send({ type: "move-right" }),
+      ArrowLeft: () => client?.sendMessage({ type: "move-left" }),
+      ArrowRight: () => client?.sendMessage({ type: "move-right" }),
     }
 
     bindings[event.key]?.()
   })
 
-  const players: PlayerState[] = Object.values(state?.players ?? {})
+  switch (status) {
+    case "connecting":
+      // i dunno how to render text with three
+      return null
 
-  return (
-    <>
-      {players.map((player, index) => (
-        <mesh key={index} ref={meshRef} position={[player.position, 0, 0]}>
-          <boxBufferGeometry attach="geometry" args={[1, 1, 1]} />
-          <meshNormalMaterial attach="material" />
-        </mesh>
-      ))}
-    </>
-  )
+    case "gameplay":
+      return (
+        <>
+          {gameState.players.map((player, index) => (
+            <mesh key={index} position={[player.position, 0, 0]}>
+              <boxBufferGeometry attach="geometry" args={[1, 1, 1]} />
+              <meshNormalMaterial attach="material" />
+            </mesh>
+          ))}
+        </>
+      )
+  }
 }

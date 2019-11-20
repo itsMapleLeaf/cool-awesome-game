@@ -1,12 +1,33 @@
-import { Server } from "colyseus"
-import { GameplayRoom } from "./GameplayRoom"
+import {
+  addPlayer,
+  GameState,
+  initialState,
+  movePlayer,
+  removePlayer,
+} from "../core/gameState"
+import { GameClientMessage } from "../core/types"
+import { Server } from "../framework/Server"
 
-const port = Number(process.env.port) || 3001
+const server = new Server<GameState, GameClientMessage>({
+  initialState,
+})
 
-const gameServer = new Server()
+server.onConnect.listen((client) => {
+  server.setState(addPlayer(client.id))
+})
 
-gameServer.define("gameplay", GameplayRoom)
+server.onDisconnect.listen((client) => {
+  server.setState(removePlayer(client.id))
+})
 
-gameServer.listen(port, undefined, undefined, () => {
-  console.log(`listening on http://localhost:${port}`)
+server.onMessage.listen((client, message) => {
+  switch (message.type) {
+    case "move-left":
+      server.setState(movePlayer(client.id, -1))
+      break
+
+    case "move-right":
+      server.setState(movePlayer(client.id, 1))
+      break
+  }
 })

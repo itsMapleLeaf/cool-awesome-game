@@ -1108,6 +1108,13 @@
   dependencies:
     source-map "^0.6.1"
 
+"@types/uuid@^3.4.6":
+  version "3.4.6"
+  resolved "https://registry.yarnpkg.com/@types/uuid/-/uuid-3.4.6.tgz#d2c4c48eb85a757bf2927f75f939942d521e3016"
+  integrity sha512-cCdlC/1kGEZdEglzOieLDYBxHsvEOIg7kp/2FYyVR9Pxakq+Qf/inL3RKQ+PA8gOlI/NnL+fXmQH12nwcGzsHw==
+  dependencies:
+    "@types/node" "*"
+
 "@types/webpack-dev-server@^3.4.0":
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/@types/webpack-dev-server/-/webpack-dev-server-3.4.0.tgz#8e29afafb8238185c0d4e94fb544f0e12f0248e1"
@@ -1154,7 +1161,7 @@
     "@types/webpack-sources" "*"
     source-map "^0.6.0"
 
-"@types/ws@^6.0.1":
+"@types/ws@^6.0.1", "@types/ws@^6.0.3":
   version "6.0.3"
   resolved "https://registry.yarnpkg.com/@types/ws/-/ws-6.0.3.tgz#b772375ba59d79066561c8d87500144d674ba6b3"
   integrity sha512-yBTM0P05Tx9iXGq00BbJPo37ox68R5vaGTXivs6RGh/BQ6QP5zqZDGWdAO6JbRE/iR1l80xeGAwCQS2nMV9S/w==
@@ -3404,6 +3411,11 @@ ignore-walk@^3.0.1:
   dependencies:
     minimatch "^3.0.4"
 
+immer@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/immer/-/immer-5.0.0.tgz#07f462b7d95f7e86c214a861ecacd766d42b8c0a"
+  integrity sha512-G7gRqKbi9NE025XVyqyTV98dxUOtdKvu/P1QRaVZfA55aEcXgjbxPdm+TlWdcSMNPKijlaHNz61DGPyelouRlA==
+
 import-local@2.0.0, import-local@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/import-local/-/import-local-2.0.0.tgz#55070be38a5993cf18ef6db7e961f5bee5c5a09d"
@@ -3733,6 +3745,11 @@ isobject@^3.0.0, isobject@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/isobject/-/isobject-3.0.1.tgz#4e431e92b11a9731636aa1f9c8d1ccbcfdab78df"
   integrity sha1-TkMekrEalzFjaqH5yNHMvP2reN8=
+
+isomorphic-ws@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/isomorphic-ws/-/isomorphic-ws-4.0.1.tgz#55fd4cd6c5e6491e76dc125938dd863f5cd4f2dc"
+  integrity sha512-BhBvN2MBpWTaSHdWRb/bwdZJ1WaehQ2L1KngkCkfLUGF0mAWAT1sQUQacEmQ0jXkFw/czDXPNQSL5u2/Krsz1w==
 
 jest-diff@^24.3.0:
   version "24.9.0"
@@ -6410,7 +6427,7 @@ utils-merge@1.0.1:
   resolved "https://registry.yarnpkg.com/utils-merge/-/utils-merge-1.0.1.tgz#9f95710f50a267947b2ccc124741c1028427e713"
   integrity sha1-n5VxD1CiZ5R7LMwSR0HBAoQn5xM=
 
-uuid@^3.0.1, uuid@^3.3.2:
+uuid@^3.0.1, uuid@^3.3.2, uuid@^3.3.3:
   version "3.3.3"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.3.3.tgz#4568f0216e78760ee1dbf3a4d2cf53e224112866"
   integrity sha512-pW0No1RGHgzlpHJO1nsVrHKpOEIxkGg1xB+v0ZmdNH5OAeAwzAVrCnI2/6Mtx+Uys6iaylxa+D3g4j63IKKjSQ==
@@ -6661,7 +6678,7 @@ ws@^6.2.1:
   dependencies:
     async-limiter "~1.0.0"
 
-ws@^7.1.0:
+ws@^7.1.0, ws@^7.2.0:
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/ws/-/ws-7.2.0.tgz#422eda8c02a4b5dba7744ba66eebbd84bcef0ec7"
   integrity sha512-+SqNqFbwTm/0DC18KYzIsMTnEWpLwJsiasW/O17la4iDRRIO9uaHbvKiAS3AHgTiuuWerK/brj4O6MYZkei9xg==
