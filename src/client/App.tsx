@@ -11,7 +11,9 @@ export default function App() {
   const [gameState, setGameState] = useState<GameState>(initialGameState)
 
   useEffect(() => {
-    const client: GameClient = new Client(`ws://localhost:3001`)
+    const client: GameClient = new Client()
+
+    client.connect(`ws://localhost:3001`)
 
     client.onConnected.listen(() => {
       setClient(client)

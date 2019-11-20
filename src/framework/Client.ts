@@ -19,11 +19,7 @@ export class Client<State, OutgoingMessage> {
   onDisconnected = new EventChannel()
   onNewState = new EventChannel<[State]>()
 
-  constructor(url: string) {
-    this.connect(url)
-  }
-
-  private connect(url: string) {
+  connect(url: string) {
     if (this.status !== "offline") return
     this.status = "connecting"
 
@@ -69,10 +65,6 @@ export class Client<State, OutgoingMessage> {
     }
   }
 
-  private send(data: ClientMessage<OutgoingMessage>) {
-    this.socket?.send(JSON.stringify(data))
-  }
-
   sendMessage(message: OutgoingMessage) {
     this.send({ type: "client-message", message })
   }
@@ -89,6 +81,10 @@ export class Client<State, OutgoingMessage> {
     this.onConnected.clear()
     this.onDisconnected.clear()
     this.onNewState.clear()
+  }
+
+  private send(data: ClientMessage<OutgoingMessage>) {
+    this.socket?.send(JSON.stringify(data))
   }
 }
 
