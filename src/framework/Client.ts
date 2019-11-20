@@ -5,12 +5,15 @@ import { sleep } from "../common/sleep"
 import { EventChannel } from "./EventChannel"
 import { ClientMessage, ServerMessage } from "./types"
 
+type ClientStatus = "offline" | "connecting" | "online"
+
 // using a symbol for a lack of state to support _any_ state value
 const noState = Symbol()
 
 export class Client<State, OutgoingMessage> {
   private socket?: WebSocket
   private state: State | typeof noState = noState
+  private status: ClientStatus = "offline"
 
   onConnected = new EventChannel()
   onDisconnected = new EventChannel()
@@ -21,19 +24,25 @@ export class Client<State, OutgoingMessage> {
   }
 
   private connect(url: string) {
+    if (this.status !== "offline") return
+    this.status = "connecting"
+
     const socket = (this.socket = new WebSocket(url))
 
     socket.onopen = () => {
+      this.status = "online"
       this.onConnected.send()
     }
 
     socket.onclose = async () => {
+      this.status = "offline"
       this.onDisconnected.send()
       await sleep(1000)
       this.connect(url)
     }
 
     socket.onerror = async () => {
+      this.status = "offline"
       this.onDisconnected.send()
       await sleep(1000)
       this.connect(url)
