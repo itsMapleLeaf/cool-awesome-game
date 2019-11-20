@@ -1,13 +1,13 @@
-import WebSocket from "isomorphic-ws"
 import { sleep } from "../common/sleep"
 import { ClientRoom } from "./ClientRoom"
 import { EventChannel } from "./EventChannel"
-import { ClientMessage, ServerMessage } from "./types"
+import { TypedSocket } from "./TypedSocket"
+import { FrameworkClientSocket, ServerMessage } from "./types"
 
 type ClientStatus = "offline" | "connecting" | "online"
 
 export class Client {
-  private socket?: WebSocket
+  private socket?: FrameworkClientSocket
   private status: ClientStatus = "offline"
   private rooms = new Map<string, ClientRoom>()
 
@@ -18,56 +18,47 @@ export class Client {
     if (this.status !== "offline") return
     this.status = "connecting"
 
-    const socket = (this.socket = new WebSocket(url))
+    const socket = (this.socket = TypedSocket.fromUrl(url))
 
-    socket.onopen = () => {
+    socket.onOpen.listen(() => {
       this.status = "online"
       this.onConnected.send()
-    }
+    })
 
-    socket.onclose = async () => {
+    socket.onClose.listen(async () => {
       this.status = "offline"
       this.onDisconnected.send()
       await sleep(1000)
       this.connect(url)
-    }
+    })
 
-    socket.onerror = async () => {
+    socket.onError.listen(async () => {
       this.status = "offline"
       this.onDisconnected.send()
       await sleep(1000)
       this.connect(url)
-    }
+    })
 
-    socket.onmessage = ({ data }) => {
-      this.handleServerMessage(JSON.parse(String(data)))
-    }
+    socket.onMessage.listen((message) => {
+      this.handleServerMessage(message)
+    })
   }
 
   disconnect() {
-    if (this.socket) {
-      this.socket.onopen = () => {}
-      this.socket.onclose = () => {}
-      this.socket.onmessage = () => {}
-      this.socket.onerror = () => {}
-      this.socket.close()
-    }
-
+    this.socket?.removeListeners()
+    this.socket?.disconnect()
     this.onConnected.clear()
     this.onDisconnected.clear()
   }
 
   joinRoom<State, OutgoingMessage>(id: string) {
-    this.send({ type: "join-room", roomId: id })
+    if (!this.socket) return
 
-    // TODO: pass socket wrapper instead of "this"
-    const room = new ClientRoom<State, OutgoingMessage>({ id }, this)
+    this.socket.send({ type: "join-room", roomId: id })
+
+    const room = new ClientRoom<State, OutgoingMessage>({ id }, this.socket)
     this.rooms.set(id, room as any) // variance issue
     return room
-  }
-
-  send(data: ClientMessage) {
-    this.socket?.send(JSON.stringify(data))
   }
 
   private handleServerMessage(message: ServerMessage) {

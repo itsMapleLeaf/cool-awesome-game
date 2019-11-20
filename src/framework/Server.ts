@@ -1,11 +1,12 @@
-import WebSocket from "isomorphic-ws"
 import uuid from "uuid/v4"
 import { EventChannel } from "./EventChannel"
 import { ServerClient } from "./ServerClient"
 import { ServerRoom, ServerRoomOptions } from "./ServerRoom"
-import { ClientMessage, ServerMessage } from "./types"
+import { TypedSocketServer } from "./TypedSocketServer"
+import { ClientMessage, FrameworkServer } from "./types"
 
 export class Server {
+  private readonly server: FrameworkServer
   private readonly clients = new Set<ServerClient>()
   private readonly rooms = new Map<string, ServerRoom>()
 
@@ -13,30 +14,30 @@ export class Server {
   readonly onDisconnect = new EventChannel<[ServerClient]>()
 
   constructor() {
-    this.createSocketServer()
+    this.server = this.createSocketServer()
   }
 
   createRoom<State, IncomingMessage>(options: ServerRoomOptions<State>) {
-    // passing "this" is an anti-pattern and breaks encapsulation
-    // TODO: create a simple wrapper around the websocket server and pass that instead
-    const room = new ServerRoom<State, IncomingMessage>(options, this)
+    const room = new ServerRoom<State, IncomingMessage>(options, this.server)
     this.rooms.set(room.id, room as any) // variance issue
     return room
   }
 
   private createSocketServer() {
-    const server = new WebSocket.Server({ port: 3001 })
+    const server: FrameworkServer = new TypedSocketServer({
+      port: 3001,
+    })
 
-    server.on("connection", (socket) => {
+    server.onConnection.listen((socket) => {
       const client = new ServerClient(uuid(), socket)
       this.clients.add(client)
       this.onConnect.send(client)
 
-      socket.on("message", (data) => {
-        this.handleClientMessage(client, JSON.parse(String(data)))
+      socket.onMessage.listen((message) => {
+        this.handleClientMessage(client, message)
       })
 
-      socket.on("close", () => {
+      socket.onClose.listen(() => {
         for (const [, room] of this.rooms) {
           room.removeClient(client.id)
         }
@@ -45,19 +46,13 @@ export class Server {
       })
     })
 
-    server.on("listening", () => {
+    server.onListening.listen(() => {
       console.info(
         `server listening on http://localhost:${server.options.port}`,
       )
     })
 
     return server
-  }
-
-  broadcast(message: ServerMessage) {
-    for (const client of this.clients) {
-      client.send(message)
-    }
   }
 
   private handleClientMessage(client: ServerClient, message: ClientMessage) {

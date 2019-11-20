@@ -1,7 +1,6 @@
 import { applyStateChanges } from "./applyStateChanges"
-import { Client } from "./Client"
 import { EventChannel } from "./EventChannel"
-import { ServerMessage } from "./types"
+import { FrameworkClientSocket, ServerMessage } from "./types"
 
 type ClientRoomOptions = { id: string }
 
@@ -10,20 +9,20 @@ const noState = Symbol()
 
 export class ClientRoom<State = unknown, OutgoingMessage = unknown> {
   private state: State | typeof noState = noState
-  private readonly client: Client
+  private readonly socket: FrameworkClientSocket
 
   readonly id: string
   readonly onJoin = new EventChannel()
   readonly onLeave = new EventChannel()
   readonly onNewState = new EventChannel<[State]>()
 
-  constructor(options: ClientRoomOptions, client: Client) {
+  constructor(options: ClientRoomOptions, socket: FrameworkClientSocket) {
     this.id = options.id
-    this.client = client
+    this.socket = socket
   }
 
   sendMessage(message: OutgoingMessage) {
-    this.client.send({ type: "room-client-message", roomId: this.id, message })
+    this.socket.send({ type: "room-client-message", roomId: this.id, message })
   }
 
   handleServerMessage(message: ServerMessage<State>) {

@@ -1,8 +1,7 @@
 import { diff } from "deep-diff"
 import { EventChannel } from "./EventChannel"
-import { Server } from "./Server"
 import { ServerClient } from "./ServerClient"
-import { ClientMessage } from "./types"
+import { ClientMessage, FrameworkServer } from "./types"
 
 export type ServerRoomOptions<State> = {
   id: string
@@ -12,14 +11,14 @@ export type ServerRoomOptions<State> = {
 export class ServerRoom<State = unknown, IncomingMessage = unknown> {
   private state: State
   private readonly clients = new Map<string, ServerClient>()
-  private server: Server
+  private server: FrameworkServer
 
   readonly id: string
   readonly onJoin = new EventChannel<[ServerClient]>()
   readonly onLeave = new EventChannel<[ServerClient]>()
   readonly onMessage = new EventChannel<[ServerClient, IncomingMessage]>()
 
-  constructor(options: ServerRoomOptions<State>, server: Server) {
+  constructor(options: ServerRoomOptions<State>, server: FrameworkServer) {
     this.id = options.id
     this.state = options.initialState
     this.server = server
@@ -50,14 +49,18 @@ export class ServerRoom<State = unknown, IncomingMessage = unknown> {
   addClient(client: ServerClient) {
     this.clients.set(client.id, client)
     this.onJoin.send(client)
-    client.send({ type: "joined-room", roomId: this.id, state: this.state })
+    client.socket.send({
+      type: "joined-room",
+      roomId: this.id,
+      state: this.state,
+    })
   }
 
   removeClient(clientId: string) {
     const client = this.clients.get(clientId)
     if (client) {
       this.onLeave.send(client)
-      client.send({ type: "left-room", roomId: this.id })
+      client.socket.send({ type: "left-room", roomId: this.id })
     }
     this.clients.delete(clientId)
   }

@@ -1,4 +1,10 @@
 import { Diff } from "deep-diff"
+import { TypedSocket } from "./TypedSocket"
+import { TypedSocketServer } from "./TypedSocketServer"
+
+export type FrameworkServer = TypedSocketServer<ClientMessage, ServerMessage>
+export type FrameworkServerSocket = TypedSocket<ClientMessage, ServerMessage>
+export type FrameworkClientSocket = TypedSocket<ServerMessage, ClientMessage>
 
 export type ClientMessage<Message = unknown> =
   | { type: "join-room"; roomId: string }
