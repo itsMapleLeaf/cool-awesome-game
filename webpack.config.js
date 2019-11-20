@@ -3,6 +3,7 @@ const merge = require("webpack-merge")
 const { join } = require("path")
 const HtmlWebpackPlugin = require("html-webpack-plugin")
 const nodeExternals = require("webpack-node-externals")
+const Stylish = require("webpack-stylish")
 
 /** @type {import('webpack').Configuration} */
 const baseConfig = {
@@ -23,11 +24,8 @@ const baseConfig = {
     maxAssetSize: Infinity,
     maxEntrypointSize: Infinity,
   },
-  stats: {
-    modules: false,
-    entrypoints: false,
-    hash: false,
-  },
+  stats: false,
+  plugins: [new Stylish()],
 }
 
 const clientConfig = merge(baseConfig, {
