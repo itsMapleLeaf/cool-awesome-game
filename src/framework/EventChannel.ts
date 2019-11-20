@@ -9,7 +9,9 @@ export class EventChannel<A extends unknown[] = []> {
 
   listen(listener: EventChannelListener<A>) {
     this.listeners.add(listener)
-    return () => this.listeners.delete(listener)
+    return () => {
+      this.listeners.delete(listener)
+    }
   }
 
   clear() {
