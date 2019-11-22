@@ -21,6 +21,9 @@ export class Server<UserMessage> {
 
   readonly onConnect = new EventChannel<[ServerClient<UserMessage>]>()
   readonly onDisconnect = new EventChannel<[ServerClient<UserMessage>]>()
+  readonly onMessage = new EventChannel<
+    [ServerClient<UserMessage>, UserMessage]
+  >()
   readonly onListening = new EventChannel()
 
   constructor(private readonly options: ServerOptions = defaultOptions) {
@@ -81,6 +84,13 @@ export class Server<UserMessage> {
       const room = this.rooms.get(message.roomId)
       // TODO: send back error if room doesn't exist
       room?.handleClientMessage(client, message)
+      return
+    }
+
+    switch (message.type) {
+      case "server-message":
+        this.onMessage.send(client, message.message)
+        break
     }
   }
 
