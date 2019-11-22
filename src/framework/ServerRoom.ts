@@ -70,6 +70,10 @@ export class ServerRoom<UserMessage, State = unknown> {
     this.clients.delete(clientId)
   }
 
+  get clientCount() {
+    return this.clients.size
+  }
+
   setState(getNewState: (oldState: State) => State) {
     const newState = getNewState(this.state)
     const changes = diff(this.state, newState)
