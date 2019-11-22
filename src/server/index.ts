@@ -1,3 +1,4 @@
+import uuid from "uuid/v4"
 import {
   addPlayer,
   GameState,
@@ -5,14 +6,18 @@ import {
   movePlayer,
   removePlayer,
 } from "../core/gameState"
-import { ClientMessageType, GameMessage } from "../core/messageTypes"
+import {
+  ClientMessageType,
+  GameMessage,
+  ServerMessageType,
+} from "../core/messageTypes"
 import { Server } from "../framework/Server"
 
 const server = new Server<GameMessage>()
 
-server.onListening.listen(() => {
+function createGameplayRoom() {
   const room = server.createRoom<GameState>({
-    id: "gameplay",
+    id: uuid(),
     initialState: initialGameState,
   })
 
@@ -35,4 +40,21 @@ server.onListening.listen(() => {
         break
     }
   })
+
+  return room
+}
+
+server.onMessage.listen((client, message) => {
+  switch (message.type) {
+    case ClientMessageType.NewGame: {
+      const room = createGameplayRoom()
+
+      client.sendMessage({
+        type: ServerMessageType.RoomCreated,
+        roomId: room.id,
+      })
+
+      break
+    }
+  }
 })
