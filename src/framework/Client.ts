@@ -6,8 +6,8 @@ import { FrameworkClientSocket, ServerMessage } from "./types"
 
 type ClientStatus = "offline" | "connecting" | "online"
 
-export class Client {
-  private socket?: FrameworkClientSocket
+export class Client<UserMessage> {
+  private socket?: FrameworkClientSocket<UserMessage>
   private status: ClientStatus = "offline"
   private readonly rooms = new Map<string, ClientRoom>()
 
@@ -51,14 +51,14 @@ export class Client {
     this.onDisconnected.clear()
   }
 
-  joinRoom<State, OutgoingMessage>(id: string) {
+  joinRoom<State>(id: string) {
     if (!this.socket) {
       throw new Error("Attempted to join room before connecting")
     }
 
     this.socket.send({ type: "join-room", roomId: id })
 
-    const room = new ClientRoom<State, OutgoingMessage>({ id }, this.socket)
+    const room = new ClientRoom<State, UserMessage>({ id }, this.socket)
     this.rooms.set(id, room as any) // variance issue
     return room
   }

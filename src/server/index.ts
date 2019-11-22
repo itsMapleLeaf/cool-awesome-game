@@ -5,13 +5,13 @@ import {
   movePlayer,
   removePlayer,
 } from "../core/gameState"
-import { GameClientMessage } from "../core/messageTypes"
+import { GameMessage } from "../core/messageTypes"
 import { Server } from "../framework/Server"
 
-const server = new Server()
+const server = new Server<GameMessage>()
 
 server.onListening.listen(() => {
-  const room = server.createRoom<GameState, GameClientMessage>({
+  const room = server.createRoom<GameState>({
     id: "gameplay",
     initialState: initialGameState,
   })

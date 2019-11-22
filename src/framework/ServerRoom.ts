@@ -8,25 +8,30 @@ export type ServerRoomOptions<State> = {
   initialState: State
 }
 
-export class ServerRoom<State = unknown, IncomingMessage = unknown> {
+export class ServerRoom<UserMessage, State = unknown> {
   private state: State
-  private readonly clients = new Map<string, ServerClient>()
-  private readonly server: FrameworkServer
+  private readonly clients = new Map<string, ServerClient<UserMessage>>()
+  private readonly server: FrameworkServer<UserMessage>
 
   readonly id: string
-  readonly onJoin = new EventChannel<[ServerClient]>()
-  readonly onLeave = new EventChannel<[ServerClient]>()
-  readonly onMessage = new EventChannel<[ServerClient, IncomingMessage]>()
+  readonly onJoin = new EventChannel<[ServerClient<UserMessage>]>()
+  readonly onLeave = new EventChannel<[ServerClient<UserMessage>]>()
+  readonly onMessage = new EventChannel<
+    [ServerClient<UserMessage>, UserMessage]
+  >()
 
-  constructor(options: ServerRoomOptions<State>, server: FrameworkServer) {
+  constructor(
+    options: ServerRoomOptions<State>,
+    server: FrameworkServer<UserMessage>,
+  ) {
     this.id = options.id
     this.state = options.initialState
     this.server = server
   }
 
   handleClientMessage(
-    client: ServerClient,
-    message: ClientMessage<IncomingMessage>,
+    client: ServerClient<UserMessage>,
+    message: ClientMessage<UserMessage>,
   ) {
     switch (message.type) {
       case "join-room": {
@@ -46,7 +51,7 @@ export class ServerRoom<State = unknown, IncomingMessage = unknown> {
     }
   }
 
-  addClient(client: ServerClient) {
+  addClient(client: ServerClient<UserMessage>) {
     this.clients.set(client.id, client)
     this.onJoin.send(client)
     client.socket.send({

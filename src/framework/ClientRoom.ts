@@ -7,21 +7,24 @@ type ClientRoomOptions = { id: string }
 // using a symbol for a lack of state to support _any_ state value
 const noState = Symbol()
 
-export class ClientRoom<State = unknown, OutgoingMessage = unknown> {
+export class ClientRoom<State = unknown, UserMessage = unknown> {
   private state: State | typeof noState = noState
-  private readonly socket: FrameworkClientSocket
+  private readonly socket: FrameworkClientSocket<UserMessage>
 
   readonly id: string
   readonly onJoin = new EventChannel()
   readonly onLeave = new EventChannel()
   readonly onNewState = new EventChannel<[State]>()
 
-  constructor(options: ClientRoomOptions, socket: FrameworkClientSocket) {
+  constructor(
+    options: ClientRoomOptions,
+    socket: FrameworkClientSocket<UserMessage>,
+  ) {
     this.id = options.id
     this.socket = socket
   }
 
-  sendMessage(message: OutgoingMessage) {
+  sendMessage(message: UserMessage) {
     this.socket.send({ type: "room-client-message", roomId: this.id, message })
   }
 

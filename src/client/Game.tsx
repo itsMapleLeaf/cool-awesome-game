@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react"
 import { Canvas } from "react-three-fiber"
 import { Key } from "ts-key-enum"
 import { GameState, initialGameState } from "../core/gameState"
-import { GameClientMessage } from "../core/messageTypes"
 import { Client } from "../framework/Client"
 import GameView from "./GameView"
 import { GameClientRoom } from "./types"
@@ -22,7 +21,7 @@ function Game({ roomId }: Props) {
     client.connect(`ws://localhost:3001`)
 
     client.onConnected.listen(() => {
-      const room = client.joinRoom<GameState, GameClientMessage>(roomId)
+      const room = client.joinRoom<GameState>(roomId)
 
       room.onJoin.listen(() => {
         setRoom(room)

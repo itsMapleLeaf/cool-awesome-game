@@ -14,29 +14,29 @@ const defaultOptions: ServerOptions = {
   logging: true,
 }
 
-export class Server {
-  private readonly server: FrameworkServer
-  private readonly clients = new Set<ServerClient>()
-  private readonly rooms = new Map<string, ServerRoom>()
+export class Server<UserMessage> {
+  private readonly server: FrameworkServer<UserMessage>
+  private readonly clients = new Set<ServerClient<UserMessage>>()
+  private readonly rooms = new Map<string, ServerRoom<UserMessage>>()
 
-  readonly onConnect = new EventChannel<[ServerClient]>()
-  readonly onDisconnect = new EventChannel<[ServerClient]>()
+  readonly onConnect = new EventChannel<[ServerClient<UserMessage>]>()
+  readonly onDisconnect = new EventChannel<[ServerClient<UserMessage>]>()
   readonly onListening = new EventChannel()
 
   constructor(private readonly options: ServerOptions = defaultOptions) {
     this.server = this.createSocketServer()
   }
 
-  createRoom<State, IncomingMessage>(options: ServerRoomOptions<State>) {
+  createRoom<State>(options: ServerRoomOptions<State>) {
     this.log(chalk.green(`create room "${options.id}"`))
 
-    const room = new ServerRoom<State, IncomingMessage>(options, this.server)
+    const room = new ServerRoom<UserMessage, State>(options, this.server)
     this.rooms.set(room.id, room as any) // variance issue
     return room
   }
 
   private createSocketServer() {
-    const server: FrameworkServer = new TypedSocketServer({
+    const server: FrameworkServer<UserMessage> = new TypedSocketServer({
       port: 3001,
     })
 
@@ -73,7 +73,10 @@ export class Server {
     return server
   }
 
-  private handleClientMessage(client: ServerClient, message: ClientMessage) {
+  private handleClientMessage(
+    client: ServerClient<UserMessage>,
+    message: ClientMessage<UserMessage>,
+  ) {
     if ("roomId" in message) {
       const room = this.rooms.get(message.roomId)
       // TODO: send back error if room doesn't exist
