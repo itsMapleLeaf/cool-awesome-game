@@ -38,6 +38,14 @@ export class Server<UserMessage> {
     return room
   }
 
+  removeRoom(roomId: string) {
+    const room = this.rooms.get(roomId)
+    if (room) {
+      room.removeAllClients()
+      this.rooms.delete(roomId)
+    }
+  }
+
   private createSocketServer() {
     const server: FrameworkServer<UserMessage> = new TypedSocketServer({
       port: 3001,

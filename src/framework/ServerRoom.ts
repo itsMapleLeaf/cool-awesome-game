@@ -70,6 +70,12 @@ export class ServerRoom<UserMessage, State = unknown> {
     this.clients.delete(clientId)
   }
 
+  removeAllClients() {
+    for (const [, client] of this.clients) {
+      this.removeClient(client.id)
+    }
+  }
+
   get clientCount() {
     return this.clients.size
   }

@@ -27,6 +27,7 @@ function createGameplayRoom() {
 
   room.onLeave.listen((client) => {
     room.setState(removePlayer(client.id))
+    server.removeRoom(room.id)
   })
 
   room.onMessage.listen((client, message) => {
