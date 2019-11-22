@@ -5,4 +5,8 @@ export class ServerClient<UserMessage> {
     public id: string,
     public socket: FrameworkServerSocket<UserMessage>,
   ) {}
+
+  sendMessage(message: UserMessage) {
+    this.socket.send({ type: "client-message", message })
+  }
 }

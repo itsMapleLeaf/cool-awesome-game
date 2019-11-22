@@ -68,6 +68,10 @@ export class Client<UserMessage> {
     this.socket?.send({ type: "leave-room", roomId })
   }
 
+  sendMessage(message: UserMessage) {
+    this.socket?.send({ type: "server-message", message })
+  }
+
   private handleServerMessage(message: ServerMessage<UserMessage>) {
     if ("roomId" in message) {
       const room = this.rooms.get(message.roomId)
