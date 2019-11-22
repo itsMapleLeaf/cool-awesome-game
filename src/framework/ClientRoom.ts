@@ -7,9 +7,9 @@ type ClientRoomOptions = { id: string }
 // using a symbol for a lack of state to support _any_ state value
 const noState = Symbol()
 
-export class ClientRoom<State = unknown, UserMessage = unknown> {
+export class ClientRoom<UserMessage = unknown, State = unknown> {
   private state: State | typeof noState = noState
-  private readonly socket: FrameworkClientSocket<UserMessage>
+  private readonly socket: FrameworkClientSocket<UserMessage, State>
 
   readonly id: string
   readonly onJoin = new EventChannel()
@@ -18,7 +18,7 @@ export class ClientRoom<State = unknown, UserMessage = unknown> {
 
   constructor(
     options: ClientRoomOptions,
-    socket: FrameworkClientSocket<UserMessage>,
+    socket: FrameworkClientSocket<UserMessage, State>,
   ) {
     this.id = options.id
     this.socket = socket
@@ -28,7 +28,7 @@ export class ClientRoom<State = unknown, UserMessage = unknown> {
     this.socket.send({ type: "room-client-message", roomId: this.id, message })
   }
 
-  handleServerMessage(message: ServerMessage<State>) {
+  handleServerMessage(message: ServerMessage<UserMessage, State>) {
     switch (message.type) {
       case "joined-room": {
         this.onJoin.send()

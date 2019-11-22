@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react"
 import { Canvas } from "react-three-fiber"
 import { Key } from "ts-key-enum"
 import { GameState, initialGameState } from "../core/gameState"
-import { ClientMessageType } from "../core/messageTypes"
+import { ClientMessageType, GameMessage } from "../core/messageTypes"
 import { Client } from "../framework/Client"
 import GameView from "./GameView"
 import { GameClientRoom } from "./types"
@@ -17,7 +17,7 @@ function Game({ roomId }: Props) {
   const [gameState, setGameState] = useState<GameState>(initialGameState)
 
   useEffect(() => {
-    const client = new Client()
+    const client = new Client<GameMessage>()
 
     client.connect(`ws://localhost:3001`)
 

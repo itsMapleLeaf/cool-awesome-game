@@ -13,6 +13,7 @@ export class Client<UserMessage> {
 
   readonly onConnected = new EventChannel()
   readonly onDisconnected = new EventChannel()
+  readonly onMessage = new EventChannel<[UserMessage]>()
 
   connect(url: string) {
     if (this.status !== "offline") return
@@ -58,7 +59,7 @@ export class Client<UserMessage> {
 
     this.socket.send({ type: "join-room", roomId: id })
 
-    const room = new ClientRoom<State, UserMessage>({ id }, this.socket)
+    const room = new ClientRoom<UserMessage, State>({ id }, this.socket as any) // variance issue
     this.rooms.set(id, room as any) // variance issue
     return room
   }
@@ -67,7 +68,7 @@ export class Client<UserMessage> {
     this.socket?.send({ type: "leave-room", roomId })
   }
 
-  private handleServerMessage(message: ServerMessage) {
+  private handleServerMessage(message: ServerMessage<UserMessage>) {
     if ("roomId" in message) {
       const room = this.rooms.get(message.roomId)
       room?.handleServerMessage(message)
@@ -75,6 +76,14 @@ export class Client<UserMessage> {
       if (message.type === "left-room") {
         this.rooms.delete(message.roomId)
       }
+
+      return
+    }
+
+    switch (message.type) {
+      case "client-message":
+        this.onMessage.send(message.message)
+        break
     }
   }
 }
