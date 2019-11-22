@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react"
 import { Canvas } from "react-three-fiber"
 import { Key } from "ts-key-enum"
 import { GameState, initialGameState } from "../core/gameState"
+import { ClientMessageType } from "../core/messageTypes"
 import { Client } from "../framework/Client"
 import GameView from "./GameView"
 import { GameClientRoom } from "./types"
@@ -39,8 +40,12 @@ function Game({ roomId }: Props) {
 
   useWindowEvent("keydown", (event) => {
     const bindings: { [_ in string]?: () => void } = {
-      [Key.ArrowLeft]: () => room?.sendMessage({ type: "move-left" }),
-      [Key.ArrowRight]: () => room?.sendMessage({ type: "move-right" }),
+      [Key.ArrowLeft]: () => {
+        room?.sendMessage({ type: ClientMessageType.MoveLeft })
+      },
+      [Key.ArrowRight]: () => {
+        room?.sendMessage({ type: ClientMessageType.MoveRight })
+      },
     }
 
     bindings[event.key]?.()

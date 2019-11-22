@@ -5,7 +5,7 @@ import {
   movePlayer,
   removePlayer,
 } from "../core/gameState"
-import { GameMessage } from "../core/messageTypes"
+import { ClientMessageType, GameMessage } from "../core/messageTypes"
 import { Server } from "../framework/Server"
 
 const server = new Server<GameMessage>()
@@ -26,11 +26,11 @@ server.onListening.listen(() => {
 
   room.onMessage.listen((client, message) => {
     switch (message.type) {
-      case "move-left":
+      case ClientMessageType.MoveLeft:
         room.setState(movePlayer(client.id, -1))
         break
 
-      case "move-right":
+      case ClientMessageType.MoveRight:
         room.setState(movePlayer(client.id, 1))
         break
     }
