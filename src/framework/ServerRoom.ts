@@ -80,6 +80,10 @@ export class ServerRoom<UserMessage, State = unknown> {
     return this.clients.size
   }
 
+  getState(): Readonly<State> {
+    return this.state
+  }
+
   setState(getNewState: (oldState: State) => State) {
     const newState = getNewState(this.state)
     const changes = diff(this.state, newState)
